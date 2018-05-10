@@ -3,6 +3,7 @@
 
 	function appModule() {
 
+		var API_CARS = 'http://localhost:3000/car';
 		var $carImage = new DOM('[data-js="car-input-image"]');
 		var $carBrand = new DOM('[data-js="car-input-brand"]');
 		var $carYear = new DOM('[data-js="car-input-year"]');
@@ -25,6 +26,7 @@
 
 		function init() {
 			_getCompanyData();
+			_getCars();
 			$btnCarForm.on('click', handleSubmitCarForm);
 		}
 
@@ -37,11 +39,27 @@
 			});
 		}
 
+		function _getCars() {
+			AJAX.get(API_CARS, function (data) {
+				data.forEach(function (car) {
+					_updateTableCar(car);
+				});
+			});
+		}
+
+		function _sendCarToServer(car) {
+			AJAX.post(API_CARS, car, function (data) {
+				if (data.response === 'success') {
+					console.log('Yes..');
+				}
+			});
+		}
+
 		function _saveCar() {
 
 			var newCarObj = {
 				image: $carImage.getFirst().value,
-				brand: $carBrand.getFirst().value,
+				brandModel: $carBrand.getFirst().value,
 				year: $carYear.getFirst().value,
 				plate: $carPlate.getFirst().value,
 				color: $carColor.getFirst().value,
@@ -49,6 +67,7 @@
 			};
 
 			if (_isFormValid(newCarObj)) {
+				_sendCarToServer(newCarObj);
 				savedCars.push(newCarObj);
 				_updateTableCar(newCarObj);
 				_clearForm();
@@ -97,14 +116,16 @@
 
 			var $fragment = document.createDocumentFragment();
 			var $newTr = document.createElement('tr');
-			$newTr.setAttribute('data-id-tr', obj.id);
+			var id = obj.id || _incrementID();
+
+			$newTr.setAttribute('data-id-tr', id);
 
 			$newTr.appendChild(_createImg(obj.image));
-			$newTr.appendChild(_createTd(obj.brand));
+			$newTr.appendChild(_createTd(obj.brandModel));
 			$newTr.appendChild(_createTd(obj.year));
 			$newTr.appendChild(_createTd(obj.plate));
 			$newTr.appendChild(_createTd(obj.color));
-			$newTr.appendChild(_createBtnRemove('Remove', obj.id));
+			$newTr.appendChild(_createBtnRemove('Remove', id));
 
 			$fragment.appendChild($newTr)
 
