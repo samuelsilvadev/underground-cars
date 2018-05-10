@@ -15,12 +15,20 @@
 
 		var savedCars = [];
 
+		var _incrementID = (function _incrementID() {
+			var lastID = 0;
+			return function () {
+				return ++lastID;
+			}
+		})();
+
+
 		function init() {
-			getCompanyData();
+			_getCompanyData();
 			$btnCarForm.on('click', handleSubmitCarForm);
 		}
 
-		function getCompanyData() {
+		function _getCompanyData() {
 			AJAX.get('./company.json', function (data) {
 				if (!data.err) {
 					$companyName.getFirst().textContent = data.name;
@@ -29,24 +37,42 @@
 			});
 		}
 
-		function saveCar() {
+		function _saveCar() {
 
 			var newCarObj = {
 				image: $carImage.getFirst().value,
 				brand: $carBrand.getFirst().value,
 				year: $carYear.getFirst().value,
 				plate: $carPlate.getFirst().value,
-				color: $carColor.getFirst().value
+				color: $carColor.getFirst().value,
+				id: _incrementID()
 			};
 
 			if (_isFormValid(newCarObj)) {
 				savedCars.push(newCarObj);
-				updateTableCar(newCarObj);
-				clearForm();
+				_updateTableCar(newCarObj);
+				_clearForm();
 			}
 		}
 
-		function clearForm() {
+		function _removeCar() {
+			var id = this.getAttribute('data-id');
+			var __removeFromArray = function __removeFromArray() {
+				savedCars = savedCars.filter(function (car) {
+					return car.id !== id;
+				});
+			};
+			var __removeFromView = function __removeFromView() {
+				var $trToRemove = new DOM('[data-id-tr="' + id + '"]');
+				$trToRemove.getFirst().remove();
+			};
+			if (id) {
+				__removeFromArray();
+				__removeFromView();
+			}
+		}
+
+		function _clearForm() {
 			$carImage.getFirst().value = '';
 			$carBrand.getFirst().value = '';
 			$carYear.getFirst().value = '';
@@ -67,16 +93,18 @@
 			return formIsValid;
 		}
 
-		function updateTableCar(obj) {
+		function _updateTableCar(obj) {
 
 			var $fragment = document.createDocumentFragment();
 			var $newTr = document.createElement('tr');
+			$newTr.setAttribute('data-id-tr', obj.id);
 
 			$newTr.appendChild(_createImg(obj.image));
 			$newTr.appendChild(_createTd(obj.brand));
 			$newTr.appendChild(_createTd(obj.year));
 			$newTr.appendChild(_createTd(obj.plate));
 			$newTr.appendChild(_createTd(obj.color));
+			$newTr.appendChild(_createBtnRemove('Remove', obj.id));
 
 			$fragment.appendChild($newTr)
 
@@ -97,9 +125,20 @@
 			return $td;
 		}
 
+		function _createBtnRemove(text, id) {
+			var $td = _createTd('');
+			var $newBtn = document.createElement('button');
+			$newBtn.textContent = text;
+			$newBtn.setAttribute('data-id', id);
+			$newBtn.setAttribute('class', 'car-list__btn-remove');
+			$newBtn.addEventListener('click', _removeCar);
+			$td.appendChild($newBtn);
+			return $td;
+		}
+
 		function handleSubmitCarForm(e) {
 			e.preventDefault();
-			saveCar();
+			_saveCar();
 		}
 
 		return {

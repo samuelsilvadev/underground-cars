@@ -37,7 +37,8 @@ img {
     width: 90%;
 }
 
-.car-form__btn-search {
+.car-form__btn-search,
+.car-list__btn-remove {
     background-color: var(--default-color);
     color: #fff;
     cursor: pointer;
