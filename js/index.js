@@ -16,14 +16,6 @@
 
 		var savedCars = [];
 
-		var _incrementID = (function _incrementID() {
-			var lastID = 0;
-			return function () {
-				return ++lastID;
-			}
-		})();
-
-
 		function init() {
 			_getCompanyData();
 			_getCars();
@@ -41,14 +33,24 @@
 
 		function _getCars() {
 			AJAX.get(API_CARS, function (data) {
+				savedCars = [];
 				data.forEach(function (car) {
 					_updateTableCar(car);
+					savedCars.push(car);
 				});
 			});
 		}
 
 		function _sendCarToServer(car) {
 			AJAX.post(API_CARS, car, function (data) {
+				if (data.response === 'success') {
+					console.log('Yes..');
+				}
+			});
+		}
+
+		function _removeCarFromServer(plateCar) {
+			AJAX.del(API_CARS, plateCar, function (data) {
 				if (data.response === 'success') {
 					console.log('Yes..');
 				}
@@ -62,11 +64,10 @@
 				brandModel: $carBrand.getFirst().value,
 				year: $carYear.getFirst().value,
 				plate: $carPlate.getFirst().value,
-				color: $carColor.getFirst().value,
-				id: _incrementID()
+				color: $carColor.getFirst().value
 			};
 
-			if (_isFormValid(newCarObj)) {
+			if (_isFormValid(newCarObj) && !_hasThisPlate(newCarObj.plate)) {
 				_sendCarToServer(newCarObj);
 				savedCars.push(newCarObj);
 				_updateTableCar(newCarObj);
@@ -75,19 +76,21 @@
 		}
 
 		function _removeCar() {
-			var id = this.getAttribute('data-id');
+
+			var plate = this.getAttribute('data-js-plate');
 			var __removeFromArray = function __removeFromArray() {
 				savedCars = savedCars.filter(function (car) {
-					return car.id !== id;
+					return car.plate !== plate;
 				});
 			};
 			var __removeFromView = function __removeFromView() {
-				var $trToRemove = new DOM('[data-id-tr="' + id + '"]');
+				var $trToRemove = new DOM('[data-js-tr-plate="' + plate + '"]');
 				$trToRemove.getFirst().remove();
 			};
-			if (id) {
+			if (plate) {
 				__removeFromArray();
 				__removeFromView();
+				_removeCarFromServer('plate=' + plate);
 			}
 		}
 
@@ -112,20 +115,23 @@
 			return formIsValid;
 		}
 
+		function _hasThisPlate(plate) {
+			return savedCars.some(function (car) {
+				return car.plate === plate;
+			});
+		}
+
 		function _updateTableCar(obj) {
 
 			var $fragment = document.createDocumentFragment();
 			var $newTr = document.createElement('tr');
-			var id = obj.id || _incrementID();
-
-			$newTr.setAttribute('data-id-tr', id);
-
+			$newTr.setAttribute('data-js-tr-plate', obj.plate)
 			$newTr.appendChild(_createImg(obj.image));
 			$newTr.appendChild(_createTd(obj.brandModel));
 			$newTr.appendChild(_createTd(obj.year));
 			$newTr.appendChild(_createTd(obj.plate));
 			$newTr.appendChild(_createTd(obj.color));
-			$newTr.appendChild(_createBtnRemove('Remove', id));
+			$newTr.appendChild(_createBtnRemove('Remove', obj.plate));
 
 			$fragment.appendChild($newTr)
 
@@ -146,11 +152,11 @@
 			return $td;
 		}
 
-		function _createBtnRemove(text, id) {
+		function _createBtnRemove(text, plate) {
 			var $td = _createTd('');
 			var $newBtn = document.createElement('button');
 			$newBtn.textContent = text;
-			$newBtn.setAttribute('data-id', id);
+			$newBtn.setAttribute('data-js-plate', plate);
 			$newBtn.setAttribute('class', 'car-list__btn-remove');
 			$newBtn.addEventListener('click', _removeCar);
 			$td.appendChild($newBtn);
