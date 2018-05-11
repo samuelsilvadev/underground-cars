@@ -1,0 +1,23 @@
+{
+  "name": "underground-cars",
+  "version": "0.0.1",
+  "description": "Project used to course JS NINJA",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/.bin/http-server",
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samuelsilvadev/underground-cars.git"
+  },
+  "author": "Samuel Silva",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/samuelsilvadev/underground-cars/issues"
+  },
+  "homepage": "https://github.com/samuelsilvadev/underground-cars#readme",
+  "devDependencies": {
+    "http-server": "^0.11.1"
+  }
+}
