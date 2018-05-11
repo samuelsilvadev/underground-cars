@@ -57,6 +57,12 @@
 				ajax.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 				ajax.send(_serialize(data));
 				_handleAjax(ajax, callback);
+			},
+			del: function (url, data, callback) {
+				var ajax = _initAjax('DELETE', url);
+				ajax.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				ajax.send(data);
+				_handleAjax(ajax, callback);
 			}
 		};
 	}
