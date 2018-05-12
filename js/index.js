@@ -23,7 +23,7 @@
 		}
 
 		function _getCompanyData() {
-			AJAX.get('./company.json', function (data) {
+			AJAX.get('http://localhost:3000/company', function (data) {
 				if (!data.err) {
 					$companyName.getFirst().textContent = data.name;
 					$companyTelephone.getFirst().textContent = data.phone;
