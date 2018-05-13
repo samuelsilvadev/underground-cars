@@ -25,3 +25,5 @@ app.use('/car', routes);
 app.listen(port, function () {
 	console.log('Listening on port http://localhost:%d', port);
 });
+
+module.exports = app;
